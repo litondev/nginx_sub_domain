@@ -1,0 +1,111 @@
+server {
+	listen 80;
+
+	root /home/user/Project/marlin/marlin-billing/api/public;
+        
+        index index.php;
+ 
+        server_name landingpage.localhost;
+
+	location / {
+		try_files $uri $uri/ /index.php?$query_string;
+	}
+ 
+        location ~ \.php$ {
+	    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+            fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;
+            fastcgi_index index.php;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
+	}
+}
+
+server {
+	listen 80;
+
+	root /home/user/Project/marlin/marlin-app/api/public;
+
+	index index.php;
+
+	server_name app.localhost;
+	
+	location / {
+		try_files $uri $uri/ /index.php?$query_string;
+        }
+
+	location ~ \.php$ {
+		fastcgi_split_path_info ^(.+\.php)(/.+)$;
+		fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;
+		fastcgi_index index.php;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		include fastcgi_params;
+	}
+}
+
+server {
+	listen 80;
+	
+	server_name api.app.localhost;
+
+	location / {
+		proxy_pass http://app.localhost/api/v1/;
+	}
+}
+
+server {
+	listen 80;
+	
+	server_name api.billing.localhost;     
+
+	location / {
+		proxy_pass http://landingpage.localhost/api/v1/;
+        }
+	
+}
+
+server {
+	listen 80;
+
+	server_name billing.localhost;
+
+	location / {
+		proxy_pass http://localhost:3000/;
+        }
+}
+
+server {
+	listen 80;
+	
+	root /var/www/html/adminer;
+
+	index index.php;
+
+	server_name adminer.localhost;
+	
+	location ~ \.php$ {
+		try_files $uri =404;
+		fastcgi_split_path_info ^(.+\.php)(/.+)$;
+		fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;
+		fastcgi_index index.php;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		include fastcgi_params;
+	}
+}
+
+server {
+	listen 80;
+	root /var/www/html;
+	server_name localhost;
+	index index.html;
+}
+
+server {
+	listen 80;
+	
+	server_name *.localhost;
+
+	location / {
+		proxy_pass http://localhost:3333/;
+	}
+}
+
